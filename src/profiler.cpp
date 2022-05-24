@@ -15,15 +15,6 @@
 namespace prof
 {
 
-Profiler::Profiler()
-{
-    // auto res = std::atexit(_exit_handler);
-    // if (res != 0)
-    // {
-    //     std::cerr << "Error: Profiler::Profiler() failed to register atexit handler" << std::endl;
-    // }
-}
-
 Profiler::~Profiler()
 {
     print_report();
@@ -32,7 +23,6 @@ Profiler::~Profiler()
 void Profiler::start_timer(const std::string& name)
 {
     _time_stack.emplace(std::chrono::high_resolution_clock::now());
-    // get the calling function name
     if (_function_stack.empty())
     {
         auto ptr = std::make_shared<FunctionInfo>(name);
@@ -41,7 +31,6 @@ void Profiler::start_timer(const std::string& name)
     }
     else
     {
-
         auto& caller = _function_stack.top();
         auto& info = caller->children[name];
         if (info == nullptr)
@@ -54,10 +43,10 @@ void Profiler::start_timer(const std::string& name)
 
 void Profiler::stop_timer(const std::string& name)
 {
-    auto& end = std::chrono::high_resolution_clock::now();
-    auto& start = _time_stack.top();
+    auto end = std::chrono::high_resolution_clock::now();
+    const auto& start = _time_stack.top();
     _time_stack.pop();
-    auto& info = _function_stack.top();
+    const auto& info = _function_stack.top();
     info->time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     info->nb_call++;
     _function_stack.pop();

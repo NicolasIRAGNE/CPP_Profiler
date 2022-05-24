@@ -33,7 +33,6 @@ public:
     Singleton& operator=(Singleton&&) = delete;
 };
 
-
 struct FunctionInfo
 {
     std::string name;
@@ -46,28 +45,26 @@ struct FunctionInfo
 
 class Profiler : public Singleton<Profiler>
 {
-    std::stack<std::chrono::high_resolution_clock::time_point> _time_stack;
-    std::stack<std::shared_ptr<FunctionInfo>> _function_stack;
-    std::vector<std::shared_ptr<FunctionInfo>> _root_functions;
+    std::stack<std::chrono::high_resolution_clock::time_point> _time_stack; /// Stack to keep track of pushed times
+    std::stack<std::shared_ptr<FunctionInfo>> _function_stack; /// Stack to keep track of function path
+    std::vector<std::shared_ptr<FunctionInfo>> _root_functions; /// Root functions (functions that are not called by other functions)
 
 public:
-    Profiler();
     ~Profiler();
 
     /**
      * @brief Start a timer for function name
-     * This will push a new pair in the stack
+     * This function should be called at the beginning of the function.
      * @param name The name of the function
      */
     void start_timer(const std::string &name);
 
     /**
      * @brief Stop a timer for function name
-     * This will pop a pair from the stack and add the duration to the function info
+     * This should never be called directly, it is called automatically at the end of the function.
      * @param name The name of the function
      */
     void stop_timer(const std::string &name);
-
 
     void print_report() const;
     void print_report(const FunctionInfo& info, int depth = 0) const;
@@ -76,6 +73,9 @@ public:
     void to_json(std::ostream& os) const;
 };
 
+/**
+ * @brief Helper object used to start and stop timers on correct scope using constructor and destructor
+ */
 class ProfilerFrameObject
 {
     std::string _name;
